@@ -134,4 +134,4 @@ Caso encontre algum bug ou tenha sugestões de melhorias durante esta fase **BET
 
 ---
 
-*Desenvolvido com carinho por **RootsSky**.*
+*Desenvolvido com carinho por **Vinicius Carvalho**.*
