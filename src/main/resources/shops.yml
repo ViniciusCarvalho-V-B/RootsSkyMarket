@@ -1,0 +1,83 @@
+# Configuração da Loja (RootsSkyMarket Shop Engine)
+# Aqui você pode definir todas as categorias e itens da loja.
+
+categories:
+  minerais:
+    name: "&bMinérios"
+    icon: "DIAMOND"
+    slot: 11
+    fixed_price: false
+    items:
+      - "COAL"
+      - "IRON_INGOT"
+      - "GOLD_INGOT"
+      - "DIAMOND"
+      - "EMERALD"
+      - "NETHERITE_INGOT"
+      - "REDSTONE"
+      - "LAPIS_LAZULI"
+
+  blocos:
+    name: "&7Blocos de Construção"
+    icon: "BRICKS"
+    slot: 12
+    fixed_price: true # Itens nesta categoria não sofrem alteração de preço (inflação)
+    items:
+      - "STONE"
+      - "COBBLESTONE"
+      - "DIRT"
+      - "SAND"
+      - "GRAVEL"
+      - "OAK_LOG"
+      - "OAK_PLANKS"
+      - "GLASS"
+
+  fazenda:
+    name: "&aFazenda"
+    icon: "WHEAT"
+    slot: 13
+    fixed_price: false
+    items:
+      - "WHEAT"
+      - "CARROT"
+      - "POTATO"
+      - "BEETROOT"
+      - "PUMPKIN"
+      - "MELON"
+      - "SUGAR_CANE"
+      - "BONE"
+      - "ROTTEN_FLESH"
+      - "GUNPOWDER"
+      - "STRING"
+
+  alimentos:
+    name: "&eAlimentos e Carnes"
+    icon: "COOKED_BEEF"
+    slot: 14
+    fixed_price: true
+    items:
+      - "BEEF"
+      - "COOKED_BEEF"
+      - "PORKCHOP"
+      - "COOKED_PORKCHOP"
+      - "CHICKEN"
+      - "COOKED_CHICKEN"
+      - "BREAD"
+      - "APPLE"
+      - "GOLDEN_APPLE"
+
+  ferramentas:
+    name: "&6Ferramentas e Armaduras"
+    icon: "DIAMOND_PICKAXE"
+    slot: 15
+    fixed_price: true
+    items:
+      - "DIAMOND_PICKAXE"
+      - "DIAMOND_SWORD"
+      - "DIAMOND_AXE"
+      - "DIAMOND_SHOVEL"
+      - "DIAMOND_HOE"
+      - "DIAMOND_HELMET"
+      - "DIAMOND_CHESTPLATE"
+      - "DIAMOND_LEGGINGS"
+      - "DIAMOND_BOOTS"

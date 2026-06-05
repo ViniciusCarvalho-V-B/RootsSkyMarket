@@ -1,0 +1,52 @@
+name: RootsSkyMarket
+version: '${project.version}'
+main: com.rootssky.market.RootsSkyMarket
+api-version: '1.21'
+depend: [Vault]
+softdepend: [EconomyShopGUI, PlaceholderAPI]
+authors: [RootsSky]
+description: Dynamic economy engine (Banco Central) with supply and demand for Skyblock
+
+commands:
+  bolsa:
+    description: Abre o painel de tendências da bolsa
+    usage: /<command> [info [item]]
+    aliases: [stock, mercado]
+  bolsaadmin:
+    description: Comandos administrativos da economia
+    usage: /<command> <reload|reset>
+    permission: rootssky.market.admin
+    aliases: [stockadmin, mercadoadmin]
+  tendencias:
+    description: Mostra os top gainers e losers
+    usage: /tendencias
+  loja:
+    description: Abre a loja dinâmica do servidor
+    usage: /loja
+  vender:
+    description: Vende itens do inventário para a loja
+    usage: /vender <tudo|mao>
+    permission: rootssky.market.cmd.vender
+  sell:
+    description: Vende itens do inventário para a loja
+    usage: /sell <all|hand>
+    permission: rootssky.market.cmd.vender
+  sellall:
+    description: Vende tudo do inventário
+    usage: /sellall
+    permission: rootssky.market.cmd.vender
+  sellhand:
+    description: Vende item da mão
+    usage: /sellhand
+    permission: rootssky.market.cmd.vender
+
+permissions:
+  rootssky.market.admin:
+    description: Permite recarregar e forçar resets
+    default: op
+  rootssky.market.cmd.vender:
+    description: Permite o uso dos comandos de venda rápida
+    default: op
+  rootssky.market.use:
+    description: Acesso aos comandos do mercado
+    default: true

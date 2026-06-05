@@ -1,0 +1,165 @@
+# Configuração do Banco de Dados
+# Tipos suportados: SQLITE, MYSQL, POSTGRESQL
+# Se for SQLITE, o banco de dados será criado na própria pasta do plugin (Plug and Play).
+# Se for MYSQL ou POSTGRESQL, preencha as credenciais abaixo.
+database:
+  type: "SQLITE"
+  host: "seu-host-supabase.com"
+  port: 5432
+  database: "postgres"
+  user: "postgres.sua_user_aqui"
+  password: "sua_senha_aqui"
+  pool-size: 5
+
+economy:
+  transaction_tax_percent: 5.0
+  price_update_interval_minutes: 5
+  decay_rate_per_hour: 0.05
+  volume_scale_divisor: 3.0 # Controla a sensibilidade do volume (menor = mais sensível)
+  max_volume_scale: 2.0 # Teto máximo do multiplicador de volume
+  currency:
+    symbol: "R$"
+    format: "{symbol}{amount}"
+
+# Discord Webhook Integration (Eventos de Mercado)
+discord_webhook:
+  enabled: false
+  url: "https://discord.com/api/webhooks/SUA_URL_AQUI"
+  bot_name: "Lobo de Wall Street"
+  avatar_url: "https://minotar.net/helm/Notch/100.png"
+
+# Mensagens e Textos (Internacionalização)
+messages:
+  prefix: "&8[&6Bolsa&8] "
+  only_players: "&cEste comando só pode ser usado por jogadores."
+  item_not_found: "&cItem '{item}' não encontrado no mercado."
+  hold_item: "&cVocê precisa segurar um item na mão ou especificar o nome. Use: /bolsa info <item>"
+  hot_stock_picked: "&e&lQUERIDINHO DO DIA! &7O item &f{item} &7foi escolhido."
+  hot_stock_benefit: "&aAproveite! 0% de impostos nas ações de {item} por 24 horas!"
+  market_normal: "&7O mercado estabilizou e voltou ao seu estado NORMAL."
+  market_bull: "&a&lBULL MARKET! &7A economia está em forte alta! (Impostos e taxas reduzidos)"
+  market_bear: "&c&lBEAR MARKET! &7O mercado despencou! (Impostos dobrados e dividendos suspensos)"
+  dividend_received: "&aVocê recebeu {amount} em dividendos das ações de {item}!"
+  custody_charged: "&cTaxa de custódia de {amount} cobrada pelas suas ações de {item} em baixa."
+  custody_liquidated: "&4&lALERTA! &cComo você não tinha saldo, a corretora liquidou {amount} ações de {item} para pagar a custódia!"
+  calculating_top: "&eCalculando os Lobos de Wall Street... aguarde!"
+  top_empty: "&cO mercado ainda não possui investidores."
+  top_header: "&e&l=== TOP 10 INVESTIDORES ==="
+  top_format: "&6{rank}º &f{player} &8- &a{wealth}"
+
+# GUI Configuration
+gui:
+  rows: 6
+  update_interval_ticks: 20
+  theme: "DEFAULT"
+  titles:
+    main_menu: "RootsSkyMarket"
+    categories: "Categorias da Loja"
+    items: "Comprar/Vender Itens"
+    transaction: "Transação de {item}"
+    stock_market: "Bolsa de Valores"
+    stock_action: "Ação: {item}"
+    portfolio: "Sua Carteira de Ações"
+    sell_gui: "Vender Itens"
+
+# Sounds Customization
+sounds:
+  success: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  error: "ENTITY_VILLAGER_NO"
+  click: "UI_BUTTON_CLICK"
+
+# Visual Indicators
+visual_indicators:
+  enabled: true
+  show_arrows: true
+  show_percentage: true
+  colors:
+    up: "&a"
+    down: "&c"
+    stable: "&7"
+
+# Random Market Events
+market_events:
+  enabled: true
+  interval_minutes: 60
+  chance_percent: 50
+  intensity_min: 0.10
+  intensity_max: 0.30
+
+# Anti-Monopoly Limits (Limits the maximum items a player can sell per day)
+anti_monopoly:
+  enabled: true
+  max_sell_per_day: 10000
+  vip_limits:
+    "rootssky.market.vip.ascendente": 20000
+    "rootssky.market.vip.ancestral": 40000
+    "rootssky.market.vip.raizceleste": 80000
+
+# Virtual Shares (Ações)
+shares:
+  tax_percent: 5.0
+  vip_tax_exempt_permission: "rootssky.market.tax_exempt"
+
+# Hot Stock (O Queridinho do Dia)
+hot_stock:
+  enabled: true
+  interval_hours: 24
+
+# Market Indexes (Bull / Bear Market)
+market_index:
+  enabled: true
+  interval_hours: 12
+  bull_tax_percent: 2.0
+  bear_tax_percent: 10.0
+
+# Dividends and Custody (Risco Orgânico)
+dividends:
+  enabled: true
+  interval_hours: 24 # Processa pagamentos/taxas uma vez por dia (suave)
+  dividend_percent: 1.5 # % do patrimônio pago como lucro
+  custody_tax_percent: 1.0 # % do patrimônio cobrado se a ação estiver em queda prolongada
+
+# Top Investors Ranking
+top_investors:
+  enabled: true
+  tag_commands:
+    top1: "lp user %player% parent addtemp lobo_wallstreet 1d"
+    top2: "lp user %player% parent addtemp magnata 1d"
+    top3: "lp user %player% parent addtemp especulador 1d"
+
+# NPC Configuration (Unused as per rules)
+npcs:
+  enabled: false
+  type: "VILLAGER"
+
+# Item configuration
+# alpha: price sensitivity (higher = more volatile)
+# Default base prices are used if not present in database
+items:
+  STONE:
+    base_price: 1.00
+    alpha: 0.12
+  COBBLESTONE:
+    base_price: 0.80
+    alpha: 0.12
+  IRON_INGOT:
+    base_price: 5.00
+    alpha: 0.20
+  GOLD_INGOT:
+    base_price: 8.00
+    alpha: 0.25
+  DIAMOND:
+    base_price: 25.00
+    alpha: 0.30
+  NETHERITE_INGOT:
+    base_price: 100.00
+    alpha: 0.35
+  WHEAT:
+    base_price: 1.50
+    alpha: 0.10
+  CARROT:
+    base_price: 1.20
+    alpha: 0.10
+  POTATO:
+    base_price: 1.30
+    alpha: 0.10
