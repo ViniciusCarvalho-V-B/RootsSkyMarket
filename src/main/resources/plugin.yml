@@ -3,7 +3,7 @@ version: '${project.version}'
 main: com.rootssky.market.RootsSkyMarket
 api-version: '1.21'
 depend: [Vault]
-softdepend: [EconomyShopGUI, PlaceholderAPI]
+softdepend: [PlaceholderAPI]
 authors: [RootsSky]
 description: Dynamic economy engine (Banco Central) with supply and demand for Skyblock
 

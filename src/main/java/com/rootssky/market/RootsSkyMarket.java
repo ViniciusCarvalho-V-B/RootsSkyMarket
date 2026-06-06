@@ -361,7 +361,6 @@ public class RootsSkyMarket extends JavaPlugin {
                 sender.sendMessage("§7/bolsaadmin resetall §f- Limpa todas as tabelas e re-semeia");
                 sender.sendMessage("§7/bolsaadmin forceevent <bull|bear|normal> §f- Força um estado de mercado");
                 sender.sendMessage("§7/bolsaadmin forcehotstock [item] §f- Força o queridinho do dia");
-                sender.sendMessage("§7/bolsaadmin dumpapi §f- Debug da API");
                 return true;
             }
 
@@ -404,27 +403,7 @@ public class RootsSkyMarket extends JavaPlugin {
                 return true;
             }
 
-            if (args[0].equalsIgnoreCase("dumpapi")) {
-                try {
-                    Class<?> hookClass = Class.forName("me.gypopo.economyshopgui.api.EconomyShopGUIHook");
-                    sender.sendMessage("§eMethods of EconomyShopGUIHook:");
-                    for (java.lang.reflect.Method m : hookClass.getDeclaredMethods()) {
-                        sender.sendMessage("§7- " + m.getName() + " -> " + m.getReturnType().getSimpleName());
-                    }
-                    sender.sendMessage("§eMethods of ShopManager (if accessible):");
-                    Class<?> mainClass = Class.forName("me.gypopo.economyshopgui.EconomyShopGUI");
-                    Object instance = mainClass.getMethod("getInstance").invoke(null);
-                    Object shopManager = mainClass.getMethod("getShopManager").invoke(instance);
-                    for (java.lang.reflect.Method m : shopManager.getClass().getDeclaredMethods()) {
-                        if (m.getReturnType().getSimpleName().contains("List") || m.getReturnType().getSimpleName().contains("Collection") || m.getReturnType().getSimpleName().contains("Map")) {
-                            sender.sendMessage("§7- " + m.getName() + " -> " + m.getReturnType().getSimpleName());
-                        }
-                    }
-                } catch (Exception e) {
-                    sender.sendMessage("§cFailed to dump API: " + e.getMessage());
-                }
-                return true;
-            }
+
 
             switch (args[0].toLowerCase()) {
                 case "reload" -> {
