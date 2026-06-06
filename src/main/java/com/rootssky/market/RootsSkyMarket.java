@@ -151,6 +151,91 @@ public class RootsSkyMarket extends JavaPlugin {
         getLogger().info("RootsSkyMarket desativado com sucesso.");
     }
 
+    public void reloadPlugin() {
+        getLogger().info("[RootsSkyMarket] Iniciando processo de reload...");
+
+        // 1. Fechar GUIs de bolsa/loja abertas para evitar duplicação ou bugs de inventário
+        for (org.bukkit.entity.Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+            org.bukkit.inventory.InventoryView view = player.getOpenInventory();
+            if (view != null && view.getTopInventory().getHolder() != null) {
+                String holderName = view.getTopInventory().getHolder().getClass().getName();
+                if (holderName.startsWith("com.rootssky.market.gui")) {
+                    player.closeInventory();
+                }
+            }
+        }
+
+        // 2. Cancelar todas as tarefas ativas do Bukkit scheduler para este plugin
+        getServer().getScheduler().cancelTasks(this);
+
+        // 3. Desregistrar todos os listeners deste plugin para evitar duplicação
+        org.bukkit.event.HandlerList.unregisterAll(this);
+
+        // 4. Parar e limpar managers antigos
+        if (transactionManager != null) {
+            transactionManager.shutdown();
+        }
+        if (databaseManager != null) {
+            databaseManager.shutdown();
+        }
+        if (marketCache != null) {
+            marketCache.clear();
+        }
+
+        // 5. Recarregar configurações do disco
+        reloadConfig();
+        
+        if (shopManager != null) {
+            shopManager.loadShops();
+        } else {
+            shopManager = new com.rootssky.market.engine.ShopManager(this);
+            shopManager.loadShops();
+        }
+
+        // 6. Re-instanciar componentes centrais
+        databaseManager = new DatabaseManager(this);
+        databaseManager.initialize(this);
+        
+        marketCache = new MarketCache();
+        
+        transactionManager = new TransactionManager(this, databaseManager, marketCache);
+        
+        // 7. Re-instanciar e preparar listeners/engines
+        playerSharesManager = new PlayerSharesManager(this);
+        playerLimitManager = new PlayerLimitManager(this);
+        eventEngine = new EventEngine(this);
+        hotStockManager = new HotStockManager(this);
+        marketIndexManager = new MarketIndexManager(this);
+        dividendsEngine = new DividendsEngine(this);
+        topInvestorsEngine = new TopInvestorsEngine(this);
+        economyEngine = new EconomyEngine(this, databaseManager, marketCache);
+
+        // 8. Carregar dados do banco de dados e sincronizar os itens com o config.yml
+        marketCache.loadFromDatabase(databaseManager).thenRun(() -> {
+            getLogger().info("[Market] Preços carregados com sucesso após reload. Sincronizando config...");
+            syncItemsFromConfig();
+        });
+
+        // 9. Registrar novamente os listeners básicos
+        getServer().getPluginManager().registerEvents(new StockGUIListener(), this);
+        getServer().getPluginManager().registerEvents(new com.rootssky.market.gui.CustomAmountListener(), this);
+        getServer().getPluginManager().registerEvents(new com.rootssky.market.gui.SellGUIListener(this), this);
+
+        // 10. Agendar a inicialização das tarefas dos engines com delay
+        getServer().getScheduler().runTaskLater(this, () -> {
+            economyEngine.startPriceUpdateTask();
+            playerSharesManager.initialize();
+            playerLimitManager.initialize();
+            eventEngine.start();
+            hotStockManager.start();
+            marketIndexManager.start();
+            dividendsEngine.start();
+            topInvestorsEngine.start();
+            getLogger().info("[RootsSkyMarket] Todos os sistemas e tarefas reiniciados com sucesso.");
+        }, 40L);
+    }
+
+
 
 
     public void syncItemsFromConfig() {
@@ -327,9 +412,8 @@ public class RootsSkyMarket extends JavaPlugin {
 
             switch (args[0].toLowerCase()) {
                 case "reload" -> {
-                    reloadConfig();
-                    syncItemsFromConfig();
-                    sender.sendMessage("§aConfiguração recarregada e itens sincronizados com sucesso.");
+                    reloadPlugin();
+                    sender.sendMessage("§aConfiguração, shops, banco de dados e tarefas recarregados com sucesso.");
                 }
                 case "reset" -> {
                     if (args.length < 2) {
