@@ -277,16 +277,25 @@ public class RootsSkyMarket extends JavaPlugin {
         for (var entry : configItems.entrySet()) {
             MarketItem cached = marketCache.getItem(entry.getKey());
             if (cached != null) {
+                BigDecimal oldBasePrice = cached.getBasePrice();
+                BigDecimal newBasePrice = entry.getValue().getBasePrice();
+
                 // Item já existe: atualiza parâmetros estáticos e limites
-                cached.setBasePrice(entry.getValue().getBasePrice());
+                cached.setBasePrice(newBasePrice);
                 cached.setAlpha(entry.getValue().getAlpha());
                 cached.setFloorPrice(entry.getValue().getFloorPrice());
                 cached.setCeilingPrice(entry.getValue().getCeilingPrice());
                 cached.setCategory(entry.getValue().getCategory());
                 
-                // Garante que o preço atual está nos limites
-                BigDecimal adjusted = cached.getCurrentPrice().max(cached.getFloorPrice()).min(cached.getCeilingPrice());
-                cached.setCurrentPrice(adjusted);
+                // Se o preço base mudou no config.yml, redefinimos o preço atual para o novo preço base
+                if (oldBasePrice != null && oldBasePrice.compareTo(newBasePrice) != 0) {
+                    cached.setCurrentPrice(newBasePrice);
+                    getLogger().info("[Market] Preço base de " + entry.getKey() + " alterado no config.yml (" + oldBasePrice + " -> " + newBasePrice + "). Preço atual redefinido.");
+                } else {
+                    // Garante que o preço atual está nos limites
+                    BigDecimal adjusted = cached.getCurrentPrice().max(cached.getFloorPrice()).min(cached.getCeilingPrice());
+                    cached.setCurrentPrice(adjusted);
+                }
                 
                 marketCache.updateItem(entry.getKey(), cached);
                 if (databaseManager.isConnected()) {
