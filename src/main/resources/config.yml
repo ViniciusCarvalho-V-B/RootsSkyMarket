@@ -136,12 +136,10 @@ npcs:
 # alpha: price sensitivity (higher = more volatile)
 # Default base prices are used if not present in database
 items:
-  STONE:
-    base_price: 1.00
-    alpha: 0.12
-  COBBLESTONE:
-    base_price: 0.80
-    alpha: 0.12
+  # Minérios (Dinâmicos)
+  COAL:
+    base_price: 2.00
+    alpha: 0.15
   IRON_INGOT:
     base_price: 5.00
     alpha: 0.20
@@ -151,9 +149,46 @@ items:
   DIAMOND:
     base_price: 25.00
     alpha: 0.30
+  EMERALD:
+    base_price: 20.00
+    alpha: 0.25
   NETHERITE_INGOT:
     base_price: 100.00
     alpha: 0.35
+  REDSTONE:
+    base_price: 2.50
+    alpha: 0.15
+  LAPIS_LAZULI:
+    base_price: 3.00
+    alpha: 0.15
+
+  # Blocos (Fixos e Básicos)
+  STONE:
+    base_price: 1.00
+    alpha: 0.12
+  COBBLESTONE:
+    base_price: 0.80
+    alpha: 0.12
+  DIRT:
+    base_price: 0.20
+    alpha: 0.05
+  SAND:
+    base_price: 0.30
+    alpha: 0.05
+  GRAVEL:
+    base_price: 0.40
+    alpha: 0.05
+  OAK_LOG:
+    base_price: 1.50
+    alpha: 0.10
+  OAK_PLANKS:
+    base_price: 0.40
+    alpha: 0.10
+  GLASS:
+    base_price: 1.20
+    alpha: 0.10
+
+  # Fazenda (Dinâmicos)
   WHEAT:
     base_price: 1.50
     alpha: 0.10
@@ -163,3 +198,85 @@ items:
   POTATO:
     base_price: 1.30
     alpha: 0.10
+  BEETROOT:
+    base_price: 1.10
+    alpha: 0.10
+  PUMPKIN:
+    base_price: 1.60
+    alpha: 0.10
+  MELON:
+    base_price: 0.80
+    alpha: 0.10
+  SUGAR_CANE:
+    base_price: 0.90
+    alpha: 0.10
+  BONE:
+    base_price: 1.20
+    alpha: 0.15
+  ROTTEN_FLESH:
+    base_price: 0.50
+    alpha: 0.15
+  GUNPOWDER:
+    base_price: 2.50
+    alpha: 0.15
+  STRING:
+    base_price: 1.00
+    alpha: 0.15
+
+  # Alimentos (Fixos)
+  BEEF:
+    base_price: 1.50
+    alpha: 0.05
+  COOKED_BEEF:
+    base_price: 3.00
+    alpha: 0.05
+  PORKCHOP:
+    base_price: 1.40
+    alpha: 0.05
+  COOKED_PORKCHOP:
+    base_price: 2.80
+    alpha: 0.05
+  CHICKEN:
+    base_price: 1.20
+    alpha: 0.05
+  COOKED_CHICKEN:
+    base_price: 2.40
+    alpha: 0.05
+  BREAD:
+    base_price: 2.00
+    alpha: 0.05
+  APPLE:
+    base_price: 1.00
+    alpha: 0.05
+  GOLDEN_APPLE:
+    base_price: 50.00
+    alpha: 0.05
+
+  # Ferramentas e Armaduras (Fixas)
+  DIAMOND_PICKAXE:
+    base_price: 100.00
+    alpha: 0.05
+  DIAMOND_SWORD:
+    base_price: 75.00
+    alpha: 0.05
+  DIAMOND_AXE:
+    base_price: 100.00
+    alpha: 0.05
+  DIAMOND_SHOVEL:
+    base_price: 50.00
+    alpha: 0.05
+  DIAMOND_HOE:
+    base_price: 50.00
+    alpha: 0.05
+  DIAMOND_HELMET:
+    base_price: 150.00
+    alpha: 0.05
+  DIAMOND_CHESTPLATE:
+    base_price: 250.00
+    alpha: 0.05
+  DIAMOND_LEGGINGS:
+    base_price: 200.00
+    alpha: 0.05
+  DIAMOND_BOOTS:
+    base_price: 150.00
+    alpha: 0.05

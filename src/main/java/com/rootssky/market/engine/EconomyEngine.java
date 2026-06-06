@@ -35,6 +35,16 @@ public class EconomyEngine {
     }
 
     public BigDecimal calculateNewPrice(MarketItem item) {
+        // Se o item pertence a uma categoria de preço fixo, o preço não flutua (sempre preço base)
+        if (plugin.getShopManager() != null) {
+            String itemId = item.getItemId();
+            for (com.rootssky.market.engine.ShopManager.ShopCategory cat : plugin.getShopManager().getCategories().values()) {
+                if (cat.getItems().contains(itemId) && cat.isFixedPrice()) {
+                    return item.getBasePrice();
+                }
+            }
+        }
+
         int volume = item.getVolume24h();
         if (volume == 0) {
             return applyDecay(item);
@@ -65,6 +75,19 @@ public class EconomyEngine {
         return newPrice.setScale(2, RoundingMode.HALF_UP);
     }
 
+    public BigDecimal getEffectiveBasePrice(MarketItem item) {
+        BigDecimal base = item.getBasePrice();
+        if (plugin.getMarketIndexManager() != null) {
+            var state = plugin.getMarketIndexManager().getCurrentState();
+            if (state == MarketIndexManager.MarketState.BULL) {
+                return base.multiply(BigDecimal.valueOf(1.20)); // Base atrai +20% para cima no Bull
+            } else if (state == MarketIndexManager.MarketState.BEAR) {
+                return base.multiply(BigDecimal.valueOf(0.80)); // Base atrai -20% para baixo no Bear
+            }
+        }
+        return base;
+    }
+
     private BigDecimal applyDecay(MarketItem item) {
         return applyDecayFactor(item.getCurrentPrice(), item);
     }
@@ -77,7 +100,7 @@ public class EconomyEngine {
 
         double decayFactor = Math.exp(-decayRatePerHour * hoursElapsed);
         
-        BigDecimal basePrice = item.getBasePrice();
+        BigDecimal basePrice = getEffectiveBasePrice(item);
         BigDecimal diff = price.subtract(basePrice);
         BigDecimal newDiff = diff.multiply(BigDecimal.valueOf(decayFactor));
         return basePrice.add(newDiff);

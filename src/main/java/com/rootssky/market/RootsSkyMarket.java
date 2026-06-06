@@ -88,7 +88,8 @@ public class RootsSkyMarket extends JavaPlugin {
         topInvestorsEngine = new TopInvestorsEngine(this);
 
         marketCache.loadFromDatabase(databaseManager).thenRun(() -> {
-            getLogger().info("[Market] Preços carregados com sucesso.");
+            getLogger().info("[Market] Preços carregados com sucesso. Sincronizando com o config.yml...");
+            syncItemsFromConfig();
         });
 
         registerCommands();
@@ -152,100 +153,74 @@ public class RootsSkyMarket extends JavaPlugin {
 
 
 
-    private void seedDefaultItems() {
-        Map<String, MarketItem> items = new HashMap<>();
-
-        // Minerais - preços base
-        items.put("DIAMOND", new MarketItem("DIAMOND", BigDecimal.valueOf(25.00), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("EMERALD", new MarketItem("EMERALD", BigDecimal.valueOf(20.00), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("GOLD_INGOT", new MarketItem("GOLD_INGOT", BigDecimal.valueOf(8.00), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("IRON_INGOT", new MarketItem("IRON_INGOT", BigDecimal.valueOf(5.00), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("COAL", new MarketItem("COAL", BigDecimal.valueOf(2.00), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("QUARTZ", new MarketItem("QUARTZ", BigDecimal.valueOf(4.00), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("LAPIS_LAZULI", new MarketItem("LAPIS_LAZULI", BigDecimal.valueOf(3.00), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("REDSTONE", new MarketItem("REDSTONE", BigDecimal.valueOf(2.50), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("NETHERITE_INGOT", new MarketItem("NETHERITE_INGOT", BigDecimal.valueOf(100.00), BigDecimal.valueOf(0.15), "MINERALS"));
-        items.put("COPPER_INGOT", new MarketItem("COPPER_INGOT", BigDecimal.valueOf(1.80), BigDecimal.valueOf(0.15), "MINERALS"));
-
-        // Farming
-        items.put("WHEAT", new MarketItem("WHEAT", BigDecimal.valueOf(1.50), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("CARROT", new MarketItem("CARROT", BigDecimal.valueOf(1.20), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("POTATO", new MarketItem("POTATO", BigDecimal.valueOf(1.30), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("BEETROOT", new MarketItem("BEETROOT", BigDecimal.valueOf(1.10), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("MELON_SLICE", new MarketItem("MELON_SLICE", BigDecimal.valueOf(0.80), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("PUMPKIN", new MarketItem("PUMPKIN", BigDecimal.valueOf(1.60), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("SUGAR_CANE", new MarketItem("SUGAR_CANE", BigDecimal.valueOf(0.90), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("CACTUS", new MarketItem("CACTUS", BigDecimal.valueOf(1.40), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("BAMBOO", new MarketItem("BAMBOO", BigDecimal.valueOf(0.70), BigDecimal.valueOf(0.15), "FARMING"));
-        items.put("KELP", new MarketItem("KELP", BigDecimal.valueOf(0.60), BigDecimal.valueOf(0.15), "FARMING"));
-
-        // Blocos
-        items.put("STONE", new MarketItem("STONE", BigDecimal.valueOf(1.00), BigDecimal.valueOf(0.15), "BLOCKS"));
-        items.put("COBBLESTONE", new MarketItem("COBBLESTONE", BigDecimal.valueOf(0.80), BigDecimal.valueOf(0.15), "BLOCKS"));
-        items.put("OBSIDIAN", new MarketItem("OBSIDIAN", BigDecimal.valueOf(8.00), BigDecimal.valueOf(0.15), "BLOCKS"));
-
-        // Mob Drops
-        items.put("STRING", new MarketItem("STRING", BigDecimal.valueOf(1.00), BigDecimal.valueOf(0.15), "MOB_DROPS"));
-        items.put("BONE", new MarketItem("BONE", BigDecimal.valueOf(1.20), BigDecimal.valueOf(0.15), "MOB_DROPS"));
-        items.put("ENDER_PEARL", new MarketItem("ENDER_PEARL", BigDecimal.valueOf(3.00), BigDecimal.valueOf(0.15), "MOB_DROPS"));
-        items.put("SLIME_BALL", new MarketItem("SLIME_BALL", BigDecimal.valueOf(2.00), BigDecimal.valueOf(0.15), "MOB_DROPS"));
-        items.put("GUNPOWDER", new MarketItem("GUNPOWDER", BigDecimal.valueOf(2.50), BigDecimal.valueOf(0.15), "MOB_DROPS"));
-        items.put("ROTTEN_FLESH", new MarketItem("ROTTEN_FLESH", BigDecimal.valueOf(0.50), BigDecimal.valueOf(0.15), "MOB_DROPS"));
-        items.put("SPIDER_EYE", new MarketItem("SPIDER_EYE", BigDecimal.valueOf(1.10), BigDecimal.valueOf(0.15), "MOB_DROPS"));
-
-        // Simulação de variações para teste
-        // Baixas (currentPrice = basePrice * 0.95 = -5%)
-        simulatePriceVariation(items, "DIAMOND", 0.95);
-        simulatePriceVariation(items, "EMERALD", 0.95);
-        simulatePriceVariation(items, "GOLD_INGOT", 0.95);
-
-        // Altas (currentPrice = basePrice * 1.10 = +10%)
-        simulatePriceVariation(items, "IRON_INGOT", 1.10);
-        simulatePriceVariation(items, "COAL", 1.10);
-        simulatePriceVariation(items, "QUARTZ", 1.10);
-
-        // Volumes simulados
-        setVolume(items, "DIAMOND", 150);
-        setVolume(items, "EMERALD", 120);
-        setVolume(items, "GOLD_INGOT", 200);
-        setVolume(items, "IRON_INGOT", 350);
-        setVolume(items, "COAL", 500);
-        setVolume(items, "QUARTZ", 180);
-        setVolume(items, "WHEAT", 420);
-        setVolume(items, "CARROT", 310);
-        setVolume(items, "POTATO", 280);
-        setVolume(items, "NETHERITE_INGOT", 45);
-        setVolume(items, "ENDER_PEARL", 90);
-        setVolume(items, "STONE", 600);
-
-        // SEMPRE carrega no cache local imediatamente (funciona mesmo sem DB)
-        for (var entry : items.entrySet()) {
-            marketCache.updateItem(entry.getKey(), entry.getValue());
+    public void syncItemsFromConfig() {
+        if (getConfig().getConfigurationSection("items") == null) {
+            getLogger().warning("Nenhuma seção 'items' encontrada no config.yml!");
+            return;
         }
-        getLogger().info("[RootsSkyMarket] Cache local carregado com " + items.size() + " itens.");
 
-        // Se o banco estiver conectado, salva e depois recarrega do banco
+        Map<String, MarketItem> configItems = new HashMap<>();
+        for (String key : getConfig().getConfigurationSection("items").getKeys(false)) {
+            String path = "items." + key;
+            BigDecimal basePrice = BigDecimal.valueOf(getConfig().getDouble(path + ".base_price", 1.0));
+            BigDecimal alpha = BigDecimal.valueOf(getConfig().getDouble(path + ".alpha", 0.15));
+            
+            // Determinar a categoria com base no shops.yml
+            String category = "UNCATEGORIZED";
+            if (shopManager != null) {
+                for (com.rootssky.market.engine.ShopManager.ShopCategory cat : shopManager.getCategories().values()) {
+                    if (cat.getItems().contains(key)) {
+                        category = cat.getId().toUpperCase();
+                        break;
+                    }
+                }
+            }
+
+            // Opcionais de floor e ceiling
+            BigDecimal floorPrice = getConfig().contains(path + ".floor_price") ? 
+                    BigDecimal.valueOf(getConfig().getDouble(path + ".floor_price")) : 
+                    basePrice.multiply(BigDecimal.valueOf(0.2));
+            BigDecimal ceilingPrice = getConfig().contains(path + ".ceiling_price") ? 
+                    BigDecimal.valueOf(getConfig().getDouble(path + ".ceiling_price")) : 
+                    basePrice.multiply(BigDecimal.valueOf(5.0));
+
+            MarketItem item = new MarketItem(key, basePrice, basePrice, alpha, category, floorPrice, ceilingPrice, 0, java.time.Instant.now());
+            configItems.put(key, item);
+        }
+
+        // Primeiro atualiza o cache local com todos os itens do config.yml
+        for (var entry : configItems.entrySet()) {
+            MarketItem cached = marketCache.getItem(entry.getKey());
+            if (cached != null) {
+                // Item já existe: atualiza parâmetros estáticos e limites
+                cached.setBasePrice(entry.getValue().getBasePrice());
+                cached.setAlpha(entry.getValue().getAlpha());
+                cached.setFloorPrice(entry.getValue().getFloorPrice());
+                cached.setCeilingPrice(entry.getValue().getCeilingPrice());
+                cached.setCategory(entry.getValue().getCategory());
+                
+                // Garante que o preço atual está nos limites
+                BigDecimal adjusted = cached.getCurrentPrice().max(cached.getFloorPrice()).min(cached.getCeilingPrice());
+                cached.setCurrentPrice(adjusted);
+                
+                marketCache.updateItem(entry.getKey(), cached);
+                if (databaseManager.isConnected()) {
+                    databaseManager.savePrice(cached);
+                }
+            } else {
+                // Item novo: insere no cache local
+                marketCache.updateItem(entry.getKey(), entry.getValue());
+                if (databaseManager.isConnected()) {
+                    databaseManager.savePrice(entry.getValue());
+                }
+            }
+        }
+
+        // Se o banco estiver conectado, faz o seed de itens novos no banco
         if (databaseManager.isConnected()) {
-            databaseManager.seedDefaultItems(items).thenRun(() -> {
-                getLogger().info("Seeded " + items.size() + " default items into database.");
-                // Só recarrega do banco DEPOIS do seed terminar
-                marketCache.loadFromDatabase(databaseManager);
+            databaseManager.seedDefaultItems(configItems).thenRun(() -> {
+                getLogger().info("[RootsSkyMarket] Sincronização de itens concluída com sucesso.");
             });
-        }
-    }
-
-    private void simulatePriceVariation(Map<String, MarketItem> items, String itemId, double multiplier) {
-        MarketItem item = items.get(itemId);
-        if (item != null) {
-            item.setCurrentPrice(item.getBasePrice().multiply(BigDecimal.valueOf(multiplier))
-                    .setScale(2, RoundingMode.HALF_UP));
-        }
-    }
-
-    private void setVolume(Map<String, MarketItem> items, String itemId, int volume) {
-        MarketItem item = items.get(itemId);
-        if (item != null) {
-            item.setVolume24h(volume);
         }
     }
 
@@ -282,9 +257,26 @@ public class RootsSkyMarket extends JavaPlugin {
                 sender.sendMessage("§e§l=== Admin da Bolsa ===");
                 sender.sendMessage("§7/bolsaadmin reload §f- Recarrega a configuração");
                 sender.sendMessage("§7/bolsaadmin reset <item> §f- Reseta preço para o valor base");
+                sender.sendMessage("§7/bolsaadmin resetall §f- Limpa todas as tabelas e re-semeia");
                 sender.sendMessage("§7/bolsaadmin forceevent <bull|bear|normal> §f- Força um estado de mercado");
                 sender.sendMessage("§7/bolsaadmin forcehotstock [item] §f- Força o queridinho do dia");
                 sender.sendMessage("§7/bolsaadmin dumpapi §f- Debug da API");
+                return true;
+            }
+
+            if (args[0].equalsIgnoreCase("resetall")) {
+                sender.sendMessage("§eLimpando banco de dados e reiniciando a economia... Aguarde.");
+                databaseManager.resetAllPricesAndTransactions().thenRun(() -> {
+                    marketCache.clear();
+                    if (marketIndexManager != null) {
+                        marketIndexManager.setMarketState(com.rootssky.market.engine.MarketIndexManager.MarketState.NORMAL);
+                    }
+                    syncItemsFromConfig();
+                    sender.sendMessage("§aBanco de dados resetado com sucesso! Preços iniciais do config.yml aplicados.");
+                }).exceptionally(ex -> {
+                    sender.sendMessage("§cErro ao resetar o banco de dados: " + ex.getMessage());
+                    return null;
+                });
                 return true;
             }
 
@@ -336,7 +328,8 @@ public class RootsSkyMarket extends JavaPlugin {
             switch (args[0].toLowerCase()) {
                 case "reload" -> {
                     reloadConfig();
-                    sender.sendMessage("§aConfiguração recarregada com sucesso.");
+                    syncItemsFromConfig();
+                    sender.sendMessage("§aConfiguração recarregada e itens sincronizados com sucesso.");
                 }
                 case "reset" -> {
                     if (args.length < 2) {

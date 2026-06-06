@@ -404,6 +404,29 @@ public class DatabaseManager {
         return connected;
     }
 
+    public CompletableFuture<Void> resetAllPricesAndTransactions() {
+        return CompletableFuture.runAsync(() -> {
+            if (!ensureConnected()) return;
+            try (Connection conn = dataSource.getConnection()) {
+                conn.setAutoCommit(false);
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("DELETE FROM market_transactions");
+                    stmt.executeUpdate("DELETE FROM market_prices");
+                    stmt.executeUpdate("DELETE FROM player_shares");
+                    conn.commit();
+                    logger.info("Database reset: All market prices, transactions, and shares deleted.");
+                } catch (SQLException e) {
+                    conn.rollback();
+                    throw e;
+                } finally {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Failed to reset database tables", e);
+            }
+        }, executor);
+    }
+
     public void shutdown() {
         logger.info("Shutting down database manager...");
         if (dataSource != null && !dataSource.isClosed()) {

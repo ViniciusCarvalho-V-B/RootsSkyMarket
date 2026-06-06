@@ -90,18 +90,13 @@ public class StockGUI {
 
     private void buildTopGainers() {
         List<MarketItem> allItems = new ArrayList<>(plugin.getMarketCache().getAllItems());
-        List<MarketItem> gainers = new ArrayList<>();
-        for (MarketItem item : allItems) {
-            if (calculateVariation(item).compareTo(BigDecimal.ZERO) >= 0) {
-                gainers.add(item);
-            }
-        }
-        gainers.sort((a, b) -> calculateVariation(b).compareTo(calculateVariation(a)));
+        allItems.sort((a, b) -> calculateVariation(b).compareTo(calculateVariation(a))); // Descendente: Maiores altas primeiro
 
         for (int i = 0; i < GAINER_SLOTS.length; i++) {
-            if (i < gainers.size()) {
-                MarketItem item = gainers.get(i);
-                inventory.setItem(GAINER_SLOTS[i], buildMarketDisplayItem(item, true));
+            if (i < allItems.size()) {
+                MarketItem item = allItems.get(i);
+                boolean isGainer = calculateVariation(item).compareTo(BigDecimal.ZERO) >= 0;
+                inventory.setItem(GAINER_SLOTS[i], buildMarketDisplayItem(item, isGainer));
             } else {
                 inventory.setItem(GAINER_SLOTS[i], createItem(Material.LIME_STAINED_GLASS_PANE,
                         Component.text(" ").color(NamedTextColor.GRAY)));
@@ -111,18 +106,13 @@ public class StockGUI {
 
     private void buildTopLosers() {
         List<MarketItem> allItems = new ArrayList<>(plugin.getMarketCache().getAllItems());
-        List<MarketItem> losers = new ArrayList<>();
-        for (MarketItem item : allItems) {
-            if (calculateVariation(item).compareTo(BigDecimal.ZERO) < 0) {
-                losers.add(item);
-            }
-        }
-        losers.sort(Comparator.comparing(this::calculateVariation));
+        allItems.sort(Comparator.comparing(this::calculateVariation)); // Crescente: Maiores quedas primeiro
 
         for (int i = 0; i < LOSER_SLOTS.length; i++) {
-            if (i < losers.size()) {
-                MarketItem item = losers.get(i);
-                inventory.setItem(LOSER_SLOTS[i], buildMarketDisplayItem(item, false));
+            if (i < allItems.size()) {
+                MarketItem item = allItems.get(i);
+                boolean isGainer = calculateVariation(item).compareTo(BigDecimal.ZERO) >= 0;
+                inventory.setItem(LOSER_SLOTS[i], buildMarketDisplayItem(item, isGainer));
             } else {
                 inventory.setItem(LOSER_SLOTS[i], createItem(Material.RED_STAINED_GLASS_PANE,
                         Component.text(" ").color(NamedTextColor.GRAY)));
