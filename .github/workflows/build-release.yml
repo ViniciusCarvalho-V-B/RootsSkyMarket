@@ -52,8 +52,9 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: RootsSkyMarket-1.0.3-BETA.jar
+        body_path: RELEASE_NOTES.md
         draft: false
         prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
-        generate_release_notes: true
+        generate_release_notes: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
