@@ -20,15 +20,21 @@ public class ShopTransactionGUI {
     private final RootsSkyMarket plugin;
     private final ShopCategory category;
     private final String itemId;
+    private final boolean hideBackButton;
 
     public ShopTransactionGUI(RootsSkyMarket plugin, ShopCategory category, String itemId) {
+        this(plugin, category, itemId, false);
+    }
+
+    public ShopTransactionGUI(RootsSkyMarket plugin, ShopCategory category, String itemId, boolean hideBackButton) {
         this.plugin = plugin;
         this.category = category;
         this.itemId = itemId;
+        this.hideBackButton = hideBackButton;
     }
 
     public void open(Player player) {
-        ShopTransactionHolder holder = new ShopTransactionHolder(category, itemId);
+        ShopTransactionHolder holder = new ShopTransactionHolder(category, itemId, hideBackButton);
         String titleStr = plugin.getConfig().getString("gui.titles.transaction", "Transação de {item}").replace("{item}", itemId);
         Inventory inventory = Bukkit.createInventory(holder, 45, Component.text(net.md_5.bungee.api.ChatColor.translateAlternateColorCodes('&', titleStr)));
         holder.setInventory(inventory);
@@ -49,6 +55,8 @@ public class ShopTransactionGUI {
             unitPrice = category.isFixedPrice() ? marketItem.getBasePrice().doubleValue() : marketItem.getCurrentPrice().doubleValue();
         }
 
+        double vipBonusPct = plugin.getTransactionManager().getVipBonusPercentage(player);
+
         // Central Item
         Material mat = Material.valueOf(itemId);
         ItemStack centerItem = new ItemStack(mat);
@@ -57,22 +65,31 @@ public class ShopTransactionGUI {
             centerMeta.displayName(Component.text("§6" + itemId));
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("§7Preço Unitário: §a" + plugin.getVaultBridge().format(unitPrice)));
+            
+            double baseSellPrice = unitPrice * 0.95;
+            if (vipBonusPct > 0.0) {
+                double vipSellPrice = baseSellPrice * (1.0 + (vipBonusPct / 100.0));
+                lore.add(Component.text("§7Venda Unitária: §c" + plugin.getVaultBridge().format(vipSellPrice) + " §e(+" + (int)vipBonusPct + "% VIP)"));
+                lore.add(Component.text("§8(Preço base: " + plugin.getVaultBridge().format(baseSellPrice) + ")"));
+            } else {
+                lore.add(Component.text("§7Venda Unitária: §c" + plugin.getVaultBridge().format(baseSellPrice)));
+            }
             centerMeta.lore(lore);
             centerItem.setItemMeta(centerMeta);
         }
         inventory.setItem(13, centerItem);
 
         // Buy options (Left Side)
-        inventory.setItem(19, createActionBtn(Material.GREEN_STAINED_GLASS_PANE, "§aComprar 1", 1, unitPrice, true));
-        inventory.setItem(20, createActionBtn(Material.GREEN_STAINED_GLASS_PANE, "§aComprar 16", 16, unitPrice, true));
-        inventory.setItem(21, createActionBtn(Material.GREEN_STAINED_GLASS_PANE, "§aComprar 32", 32, unitPrice, true));
-        inventory.setItem(28, createActionBtn(Material.GREEN_STAINED_GLASS_PANE, "§aComprar 64", 64, unitPrice, true));
+        inventory.setItem(19, createActionBtn(Material.GREEN_STAINED_GLASS_PANE, "§aComprar 1", 1, unitPrice, true, 0.0));
+        inventory.setItem(20, createActionBtn(Material.GREEN_STAINED_GLASS_PANE, "§aComprar 16", 16, unitPrice, true, 0.0));
+        inventory.setItem(21, createActionBtn(Material.GREEN_STAINED_GLASS_PANE, "§aComprar 32", 32, unitPrice, true, 0.0));
+        inventory.setItem(28, createActionBtn(Material.GREEN_STAINED_GLASS_PANE, "§aComprar 64", 64, unitPrice, true, 0.0));
 
         // Sell options (Right Side)
-        inventory.setItem(23, createActionBtn(Material.RED_STAINED_GLASS_PANE, "§cVender 1", 1, unitPrice, false));
-        inventory.setItem(24, createActionBtn(Material.RED_STAINED_GLASS_PANE, "§cVender 16", 16, unitPrice, false));
-        inventory.setItem(25, createActionBtn(Material.RED_STAINED_GLASS_PANE, "§cVender 32", 32, unitPrice, false));
-        inventory.setItem(34, createActionBtn(Material.RED_STAINED_GLASS_PANE, "§cVender 64", 64, unitPrice, false));
+        inventory.setItem(23, createActionBtn(Material.RED_STAINED_GLASS_PANE, "§cVender 1", 1, unitPrice, false, vipBonusPct));
+        inventory.setItem(24, createActionBtn(Material.RED_STAINED_GLASS_PANE, "§cVender 16", 16, unitPrice, false, vipBonusPct));
+        inventory.setItem(25, createActionBtn(Material.RED_STAINED_GLASS_PANE, "§cVender 32", 32, unitPrice, false, vipBonusPct));
+        inventory.setItem(34, createActionBtn(Material.RED_STAINED_GLASS_PANE, "§cVender 64", 64, unitPrice, false, vipBonusPct));
 
         // Buy Custom option
         ItemStack buyCustom = new ItemStack(Material.OAK_SIGN);
@@ -104,16 +121,26 @@ public class ShopTransactionGUI {
         inventory.setItem(32, sellAll);
 
         // Add back button
-        ItemStack back = new ItemStack(Material.ARROW);
-        ItemMeta backMeta = back.getItemMeta();
-        backMeta.displayName(Component.text("§cVoltar"));
-        back.setItemMeta(backMeta);
-        inventory.setItem(40, back);
-
+        if (!hideBackButton) {
+            ItemStack back = new ItemStack(Material.ARROW);
+            ItemMeta backMeta = back.getItemMeta();
+            backMeta.displayName(Component.text("§cVoltar"));
+            back.setItemMeta(backMeta);
+            inventory.setItem(40, back);
+        } else {
+            ItemStack glassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+            ItemMeta paneMeta = glassPane.getItemMeta();
+            if (paneMeta != null) {
+                paneMeta.displayName(Component.text(" "));
+                glassPane.setItemMeta(paneMeta);
+            }
+            inventory.setItem(40, glassPane);
+        }
+ 
         player.openInventory(inventory);
     }
-
-    private ItemStack createActionBtn(Material mat, String name, int amount, double unitPrice, boolean isBuy) {
+ 
+    private ItemStack createActionBtn(Material mat, String name, int amount, double unitPrice, boolean isBuy, double vipBonusPct) {
         ItemStack item = new ItemStack(mat, amount);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
@@ -121,11 +148,19 @@ public class ShopTransactionGUI {
             List<Component> lore = new ArrayList<>();
             double total = unitPrice * amount;
             if (!isBuy) {
-                // Remove the 5% spread from sell price by default to match EconomyShopGUI default behavior
                 total = total * 0.95; 
+                if (vipBonusPct > 0.0) {
+                    double vipTotal = total * (1.0 + (vipBonusPct / 100.0));
+                    String formattedBase = plugin.getVaultBridge().format(total);
+                    String formattedVip = plugin.getVaultBridge().format(vipTotal);
+                    lore.add(Component.text("§7Total: §7§m" + formattedBase + "§r §a" + formattedVip + " §e(+" + (int)vipBonusPct + "% VIP)"));
+                } else {
+                    lore.add(Component.text("§7Total: §f" + plugin.getVaultBridge().format(total)));
+                }
+            } else {
+                lore.add(Component.text("§7Total: §f" + plugin.getVaultBridge().format(total)));
             }
             
-            lore.add(Component.text("§7Total: §f" + plugin.getVaultBridge().format(total)));
             lore.add(Component.text(""));
             lore.add(Component.text(isBuy ? "§eClique para comprar" : "§eClique para vender"));
             meta.lore(lore);

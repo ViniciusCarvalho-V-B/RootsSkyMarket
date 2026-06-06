@@ -21,19 +21,25 @@ public class ShopItemsGUI {
     private final RootsSkyMarket plugin;
     private final ShopCategory category;
     private final int page;
+    private final boolean hideBackButton;
 
     public ShopItemsGUI(RootsSkyMarket plugin, ShopCategory category) {
-        this(plugin, category, 1);
+        this(plugin, category, 1, false);
     }
 
     public ShopItemsGUI(RootsSkyMarket plugin, ShopCategory category, int page) {
+        this(plugin, category, page, false);
+    }
+
+    public ShopItemsGUI(RootsSkyMarket plugin, ShopCategory category, int page, boolean hideBackButton) {
         this.plugin = plugin;
         this.category = category;
         this.page = page;
+        this.hideBackButton = hideBackButton;
     }
 
     public void open(Player player) {
-        ShopItemsHolder holder = new ShopItemsHolder(category);
+        ShopItemsHolder holder = new ShopItemsHolder(category, hideBackButton);
         holder.setPage(page); // We need to add setPage and getPage to ShopItemsHolder
         
         String title = category.getName().replace("&", "§") + " §8- Pag " + page;
@@ -106,7 +112,15 @@ public class ShopItemsGUI {
                     }
 
                     lore.add(Component.text("§7Preço de Compra: §a" + plugin.getVaultBridge().format(currentPrice.doubleValue())));
-                    lore.add(Component.text("§7Preço de Venda: §c" + plugin.getVaultBridge().format(sellPrice.doubleValue())));
+                    double vipBonusPct = plugin.getTransactionManager().getVipBonusPercentage(player);
+                    if (vipBonusPct > 0.0) {
+                        double vipSellPrice = sellPrice.doubleValue() * (1.0 + (vipBonusPct / 100.0));
+                        String formattedBase = plugin.getVaultBridge().format(sellPrice.doubleValue());
+                        String formattedVip = plugin.getVaultBridge().format(vipSellPrice);
+                        lore.add(Component.text("§7Preço de Venda: §7§m" + formattedBase + "§r §a" + formattedVip + " §e(+" + (int)vipBonusPct + "% VIP)"));
+                    } else {
+                        lore.add(Component.text("§7Preço de Venda: §c" + plugin.getVaultBridge().format(sellPrice.doubleValue())));
+                    }
                     lore.add(Component.text(""));
                     lore.add(Component.text("§7Mercado: " + varColor + varSign + formattedVariation));
                 } else if (marketItem != null) {
@@ -130,11 +144,21 @@ public class ShopItemsGUI {
         }
 
         // Add back button
-        ItemStack back = new ItemStack(Material.ARROW);
-        ItemMeta backMeta = back.getItemMeta();
-        backMeta.displayName(Component.text("§cVoltar"));
-        back.setItemMeta(backMeta);
-        inventory.setItem(48, back); // Moved to 48
+        if (!hideBackButton) {
+            ItemStack back = new ItemStack(Material.ARROW);
+            ItemMeta backMeta = back.getItemMeta();
+            backMeta.displayName(Component.text("§cVoltar"));
+            back.setItemMeta(backMeta);
+            inventory.setItem(48, back); // Moved to 48
+        } else {
+            ItemStack glassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+            ItemMeta paneMeta = glassPane.getItemMeta();
+            if (paneMeta != null) {
+                paneMeta.displayName(Component.text(" "));
+                glassPane.setItemMeta(paneMeta);
+            }
+            inventory.setItem(48, glassPane);
+        }
         
         // Add balance button
         ItemStack balance = new ItemStack(Material.EMERALD);

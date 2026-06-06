@@ -9,10 +9,17 @@ public class ShopTransactionHolder implements InventoryHolder {
     private Inventory inventory;
     private final ShopCategory category;
     private final String itemId;
+    private boolean hideBackButton = false;
 
     public ShopTransactionHolder(ShopCategory category, String itemId) {
         this.category = category;
         this.itemId = itemId;
+    }
+
+    public ShopTransactionHolder(ShopCategory category, String itemId, boolean hideBackButton) {
+        this.category = category;
+        this.itemId = itemId;
+        this.hideBackButton = hideBackButton;
     }
 
     @Override
@@ -30,5 +37,13 @@ public class ShopTransactionHolder implements InventoryHolder {
 
     public String getItemId() {
         return itemId;
+    }
+
+    public boolean isHideBackButton() {
+        return hideBackButton;
+    }
+
+    public void setHideBackButton(boolean hideBackButton) {
+        this.hideBackButton = hideBackButton;
     }
 }

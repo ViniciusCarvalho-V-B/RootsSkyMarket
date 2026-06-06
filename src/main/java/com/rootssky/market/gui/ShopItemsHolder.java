@@ -9,9 +9,15 @@ public class ShopItemsHolder implements InventoryHolder {
     private Inventory inventory;
     private final ShopCategory category;
     private int page = 1;
+    private boolean hideBackButton = false;
 
     public ShopItemsHolder(ShopCategory category) {
         this.category = category;
+    }
+
+    public ShopItemsHolder(ShopCategory category, boolean hideBackButton) {
+        this.category = category;
+        this.hideBackButton = hideBackButton;
     }
 
     @Override
@@ -33,5 +39,13 @@ public class ShopItemsHolder implements InventoryHolder {
 
     public void setPage(int page) {
         this.page = page;
+    }
+
+    public boolean isHideBackButton() {
+        return hideBackButton;
+    }
+
+    public void setHideBackButton(boolean hideBackButton) {
+        this.hideBackButton = hideBackButton;
     }
 }

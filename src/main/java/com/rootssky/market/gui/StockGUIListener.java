@@ -141,11 +141,13 @@ public class StockGUIListener implements Listener {
         } else if (event.getInventory().getHolder() instanceof ShopItemsHolder itemsHolder) {
             event.setCancelled(true);
             if (event.getSlot() == 48) {
-                new ShopCategoryGUI(RootsSkyMarket.getInstance()).open(player);
+                if (!itemsHolder.isHideBackButton()) {
+                    new ShopCategoryGUI(RootsSkyMarket.getInstance()).open(player);
+                }
             } else if (event.getSlot() == 45 && event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.PAPER) {
-                new ShopItemsGUI(RootsSkyMarket.getInstance(), itemsHolder.getCategory(), itemsHolder.getPage() - 1).open(player);
+                new ShopItemsGUI(RootsSkyMarket.getInstance(), itemsHolder.getCategory(), itemsHolder.getPage() - 1, itemsHolder.isHideBackButton()).open(player);
             } else if (event.getSlot() == 53 && event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.PAPER) {
-                new ShopItemsGUI(RootsSkyMarket.getInstance(), itemsHolder.getCategory(), itemsHolder.getPage() + 1).open(player);
+                new ShopItemsGUI(RootsSkyMarket.getInstance(), itemsHolder.getCategory(), itemsHolder.getPage() + 1, itemsHolder.isHideBackButton()).open(player);
             } else if (event.getSlot() == 49) {
                 // Balance button, do nothing
             } else if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getCurrentItem().getType() != Material.BLACK_STAINED_GLASS_PANE) {
@@ -159,7 +161,7 @@ public class StockGUIListener implements Listener {
                         }
                         RootsSkyMarket.getInstance().getTransactionManager().processSellAll(player, itemId, unitPrice);
                     } else {
-                        new ShopTransactionGUI(RootsSkyMarket.getInstance(), itemsHolder.getCategory(), itemId).open(player);
+                        new ShopTransactionGUI(RootsSkyMarket.getInstance(), itemsHolder.getCategory(), itemId, itemsHolder.isHideBackButton()).open(player);
                     }
                 }
             }
@@ -167,7 +169,7 @@ public class StockGUIListener implements Listener {
             event.setCancelled(true);
             
             if (event.getSlot() == 40) { // Voltar
-                new ShopItemsGUI(RootsSkyMarket.getInstance(), transactionHolder.getCategory()).open(player);
+                new ShopItemsGUI(RootsSkyMarket.getInstance(), transactionHolder.getCategory(), 1, transactionHolder.isHideBackButton()).open(player);
                 return;
             }
 

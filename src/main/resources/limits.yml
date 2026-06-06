@@ -1,0 +1,171 @@
+# ====================================================================
+#              RootsSkyMarket - LIMITES DO ANTI-MONOPÓLIO             
+# ====================================================================
+# Aqui você pode definir o limite de vendas diárias por jogador para
+# cada tipo de item individual da loja.
+#
+# Para cada item, você pode configurar:
+#   enabled: true/false -> Se o limite individual está ativado para este item.
+#                          Se for false, o item usará o limite padrão (max_sell_per_day).
+#   limit: número       -> O limite máximo de itens que podem ser vendidos por dia.
+#
+# Observação: Os limites de jogadores VIPs serão multiplicados e escalados
+# automaticamente com base nos valores definidos em 'anti_monopoly.vip_limits'
+# no arquivo config.yml principal.
+# ====================================================================
+
+limits:
+  # ====================
+  # Minérios e Derivados
+  # ====================
+  COAL:
+    enabled: true
+    limit: 5000
+  IRON_INGOT:
+    enabled: true
+    limit: 3000
+  GOLD_INGOT:
+    enabled: true
+    limit: 1000
+  DIAMOND:
+    enabled: true
+    limit: 500
+  EMERALD:
+    enabled: true
+    limit: 500
+  NETHERITE_INGOT:
+    enabled: true
+    limit: 100
+  REDSTONE:
+    enabled: true
+    limit: 5000
+  LAPIS_LAZULI:
+    enabled: true
+    limit: 5000
+
+  # ====================
+  # Blocos Básicos
+  # ====================
+  STONE:
+    enabled: true
+    limit: 20000
+  COBBLESTONE:
+    enabled: true
+    limit: 50000
+  DIRT:
+    enabled: true
+    limit: 10000
+  SAND:
+    enabled: true
+    limit: 10000
+  GRAVEL:
+    enabled: true
+    limit: 10000
+  OAK_LOG:
+    enabled: true
+    limit: 5000
+  OAK_PLANKS:
+    enabled: true
+    limit: 10000
+  GLASS:
+    enabled: true
+    limit: 2000
+
+  # ====================
+  # Fazenda e Plantações
+  # ====================
+  WHEAT:
+    enabled: true
+    limit: 10000
+  CARROT:
+    enabled: true
+    limit: 10000
+  POTATO:
+    enabled: true
+    limit: 10000
+  BEETROOT:
+    enabled: true
+    limit: 10000
+  PUMPKIN:
+    enabled: true
+    limit: 5000
+  MELON:
+    enabled: true
+    limit: 20000
+  SUGAR_CANE:
+    enabled: true
+    limit: 15000
+  BONE:
+    enabled: true
+    limit: 5000
+  ROTTEN_FLESH:
+    enabled: true
+    limit: 10000
+  GUNPOWDER:
+    enabled: true
+    limit: 2000
+  STRING:
+    enabled: true
+    limit: 5000
+
+  # ====================
+  # Alimentos e Animais
+  # ====================
+  BEEF:
+    enabled: true
+    limit: 5000
+  COOKED_BEEF:
+    enabled: true
+    limit: 2000
+  PORKCHOP:
+    enabled: true
+    limit: 5000
+  COOKED_PORKCHOP:
+    enabled: true
+    limit: 2000
+  CHICKEN:
+    enabled: true
+    limit: 5000
+  COOKED_CHICKEN:
+    enabled: true
+    limit: 2000
+  BREAD:
+    enabled: true
+    limit: 3000
+  APPLE:
+    enabled: true
+    limit: 2000
+  GOLDEN_APPLE:
+    enabled: true
+    limit: 100
+
+  # ============================
+  # Ferramentas, Armas e Armaduras
+  # ============================
+  DIAMOND_PICKAXE:
+    enabled: true
+    limit: 10
+  DIAMOND_SWORD:
+    enabled: true
+    limit: 10
+  DIAMOND_AXE:
+    enabled: true
+    limit: 10
+  DIAMOND_SHOVEL:
+    enabled: true
+    limit: 20
+  DIAMOND_HOE:
+    enabled: true
+    limit: 20
+  DIAMOND_HELMET:
+    enabled: true
+    limit: 5
+  DIAMOND_CHESTPLATE:
+    enabled: true
+    limit: 5
+  DIAMOND_LEGGINGS:
+    enabled: true
+    limit: 5
+  DIAMOND_BOOTS:
+    enabled: true
+    limit: 5

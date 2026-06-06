@@ -21,6 +21,20 @@ economy:
     symbol: "R$"
     format: "{symbol}{amount}"
 
+  # Bônus percentual na venda de itens na loja para jogadores VIPs
+  vip_sell_bonus:
+    enabled: true
+    ranks:
+      basico:
+        permission: "rootssky.vip.basico"
+        percentage: 10.0
+      medio:
+        permission: "rootssky.vip.medio"
+        percentage: 15.0
+      foda:
+        permission: "rootssky.vip.foda"
+        percentage: 25.0
+
 # Discord Webhook Integration (Eventos de Mercado)
 discord_webhook:
   enabled: false
@@ -89,11 +103,18 @@ market_events:
 # Anti-Monopoly Limits (Limits the maximum items a player can sell per day)
 anti_monopoly:
   enabled: true
-  max_sell_per_day: 10000
+  max_sell_per_day: 10000 # Limite padrão para itens não listados em item_limits
   vip_limits:
     "rootssky.market.vip.ascendente": 20000
     "rootssky.market.vip.ancestral": 40000
     "rootssky.market.vip.raizceleste": 80000
+  # Limites diários específicos para cada tipo de item (Opcional)
+  # O limite VIP será calculado proporcionalmente baseado nos multiplicadores acima.
+  item_limits:
+    DIAMOND: 500
+    EMERALD: 500
+    GOLD_INGOT: 1000
+    COBBLESTONE: 50000
 
 # Virtual Shares (Ações)
 shares:

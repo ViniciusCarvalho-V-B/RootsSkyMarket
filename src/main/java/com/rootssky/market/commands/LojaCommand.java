@@ -35,7 +35,12 @@ public class LojaCommand implements CommandExecutor {
             }
             
             if (targetCat != null) {
-                new com.rootssky.market.gui.ShopItemsGUI(plugin, targetCat).open(player);
+                boolean hideBack = false;
+                if (args.length >= 2) {
+                    String sub = args[1].toLowerCase();
+                    hideBack = sub.equals("true") || sub.equals("esconder") || sub.equals("hide") || sub.equals("noback");
+                }
+                new com.rootssky.market.gui.ShopItemsGUI(plugin, targetCat, 1, hideBack).open(player);
                 return true;
             } else {
                 player.sendMessage("§cCategoria não encontrada: " + args[0]);

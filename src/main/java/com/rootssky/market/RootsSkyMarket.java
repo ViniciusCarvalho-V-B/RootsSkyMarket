@@ -46,6 +46,8 @@ public class RootsSkyMarket extends JavaPlugin {
     private TopInvestorsEngine topInvestorsEngine;
 
     private com.rootssky.market.engine.ShopManager shopManager;
+    private org.bukkit.configuration.file.FileConfiguration limitsConfig;
+    private java.io.File limitsFile;
 
     @Override
     public void onEnable() {
@@ -55,6 +57,7 @@ public class RootsSkyMarket extends JavaPlugin {
         if (!new java.io.File(getDataFolder(), "shops.yml").exists()) {
             saveResource("shops.yml", false);
         }
+        loadLimitsConfig();
         getLogger().info("========================================");
         getLogger().info("  RootsSkyMarket v" + getDescription().getVersion());
         getLogger().info("  Dynamic Economy Engine for Skyblock");
@@ -184,6 +187,7 @@ public class RootsSkyMarket extends JavaPlugin {
 
         // 5. Recarregar configurações do disco
         reloadConfig();
+        loadLimitsConfig();
         
         if (shopManager != null) {
             shopManager.loadShops();
@@ -485,5 +489,20 @@ public class RootsSkyMarket extends JavaPlugin {
     
     public MarketIndexManager getMarketIndexManager() {
         return marketIndexManager;
+    }
+
+    public void loadLimitsConfig() {
+        limitsFile = new java.io.File(getDataFolder(), "limits.yml");
+        if (!limitsFile.exists()) {
+            saveResource("limits.yml", false);
+        }
+        limitsConfig = org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(limitsFile);
+    }
+
+    public org.bukkit.configuration.file.FileConfiguration getLimitsConfig() {
+        if (limitsConfig == null) {
+            loadLimitsConfig();
+        }
+        return limitsConfig;
     }
 }

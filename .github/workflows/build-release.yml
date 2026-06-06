@@ -34,7 +34,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: plugin-jar
-        path: target/RootsSkyMarket-1.0.0.jar
+        path: target/RootsSkyMarket-1.0.3-BETA.jar
 
   release:
     needs: build
@@ -51,7 +51,7 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v2
       with:
-        files: RootsSkyMarket-1.0.0.jar
+        files: RootsSkyMarket-1.0.3-BETA.jar
         draft: false
         prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
         generate_release_notes: true
