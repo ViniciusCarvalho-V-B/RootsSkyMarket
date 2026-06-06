@@ -239,82 +239,89 @@ public class RootsSkyMarket extends JavaPlugin {
 
 
     public void syncItemsFromConfig() {
-        if (getConfig().getConfigurationSection("items") == null) {
-            getLogger().warning("Nenhuma seção 'items' encontrada no config.yml!");
-            return;
-        }
+        try {
+            if (getConfig().getConfigurationSection("items") == null) {
+                getLogger().warning("Nenhuma seção 'items' encontrada no config.yml!");
+                return;
+            }
 
-        Map<String, MarketItem> configItems = new HashMap<>();
-        for (String key : getConfig().getConfigurationSection("items").getKeys(false)) {
-            String path = "items." + key;
-            BigDecimal basePrice = BigDecimal.valueOf(getConfig().getDouble(path + ".base_price", 1.0));
-            BigDecimal alpha = BigDecimal.valueOf(getConfig().getDouble(path + ".alpha", 0.15));
-            
-            // Determinar a categoria com base no shops.yml
-            String category = "UNCATEGORIZED";
-            if (shopManager != null) {
-                for (com.rootssky.market.engine.ShopManager.ShopCategory cat : shopManager.getCategories().values()) {
-                    if (cat.getItems().contains(key)) {
-                        category = cat.getId().toUpperCase();
-                        break;
+            Map<String, MarketItem> configItems = new HashMap<>();
+            for (String key : getConfig().getConfigurationSection("items").getKeys(false)) {
+                String path = "items." + key;
+                BigDecimal basePrice = BigDecimal.valueOf(getConfig().getDouble(path + ".base_price", 1.0));
+                BigDecimal alpha = BigDecimal.valueOf(getConfig().getDouble(path + ".alpha", 0.15));
+                
+                // Determinar a categoria com base no shops.yml
+                String category = "UNCATEGORIZED";
+                if (shopManager != null) {
+                    for (com.rootssky.market.engine.ShopManager.ShopCategory cat : shopManager.getCategories().values()) {
+                        if (cat.getItems().contains(key)) {
+                            category = cat.getId().toUpperCase();
+                            break;
+                        }
                     }
                 }
+
+                // Opcionais de floor e ceiling
+                BigDecimal floorPrice = getConfig().contains(path + ".floor_price") ? 
+                        BigDecimal.valueOf(getConfig().getDouble(path + ".floor_price")) : 
+                        basePrice.multiply(BigDecimal.valueOf(0.2));
+                BigDecimal ceilingPrice = getConfig().contains(path + ".ceiling_price") ? 
+                        BigDecimal.valueOf(getConfig().getDouble(path + ".ceiling_price")) : 
+                        basePrice.multiply(BigDecimal.valueOf(5.0));
+
+                MarketItem item = new MarketItem(key, basePrice, basePrice, alpha, category, floorPrice, ceilingPrice, 0, java.time.Instant.now());
+                configItems.put(key, item);
             }
 
-            // Opcionais de floor e ceiling
-            BigDecimal floorPrice = getConfig().contains(path + ".floor_price") ? 
-                    BigDecimal.valueOf(getConfig().getDouble(path + ".floor_price")) : 
-                    basePrice.multiply(BigDecimal.valueOf(0.2));
-            BigDecimal ceilingPrice = getConfig().contains(path + ".ceiling_price") ? 
-                    BigDecimal.valueOf(getConfig().getDouble(path + ".ceiling_price")) : 
-                    basePrice.multiply(BigDecimal.valueOf(5.0));
+            java.util.List<MarketItem> toSave = new java.util.ArrayList<>();
 
-            MarketItem item = new MarketItem(key, basePrice, basePrice, alpha, category, floorPrice, ceilingPrice, 0, java.time.Instant.now());
-            configItems.put(key, item);
-        }
+            // Primeiro atualiza o cache local com todos os itens do config.yml
+            for (var entry : configItems.entrySet()) {
+                MarketItem cached = marketCache.getItem(entry.getKey());
+                if (cached != null) {
+                    BigDecimal oldBasePrice = cached.getBasePrice();
+                    BigDecimal newBasePrice = entry.getValue().getBasePrice();
 
-        // Primeiro atualiza o cache local com todos os itens do config.yml
-        for (var entry : configItems.entrySet()) {
-            MarketItem cached = marketCache.getItem(entry.getKey());
-            if (cached != null) {
-                BigDecimal oldBasePrice = cached.getBasePrice();
-                BigDecimal newBasePrice = entry.getValue().getBasePrice();
-
-                // Item já existe: atualiza parâmetros estáticos e limites
-                cached.setBasePrice(newBasePrice);
-                cached.setAlpha(entry.getValue().getAlpha());
-                cached.setFloorPrice(entry.getValue().getFloorPrice());
-                cached.setCeilingPrice(entry.getValue().getCeilingPrice());
-                cached.setCategory(entry.getValue().getCategory());
-                
-                // Se o preço base mudou no config.yml, redefinimos o preço atual para o novo preço base
-                if (oldBasePrice != null && oldBasePrice.compareTo(newBasePrice) != 0) {
-                    cached.setCurrentPrice(newBasePrice);
-                    getLogger().info("[Market] Preço base de " + entry.getKey() + " alterado no config.yml (" + oldBasePrice + " -> " + newBasePrice + "). Preço atual redefinido.");
+                    // Item já existe: atualiza parâmetros estáticos e limites
+                    cached.setBasePrice(newBasePrice);
+                    cached.setAlpha(entry.getValue().getAlpha());
+                    cached.setFloorPrice(entry.getValue().getFloorPrice());
+                    cached.setCeilingPrice(entry.getValue().getCeilingPrice());
+                    cached.setCategory(entry.getValue().getCategory());
+                    
+                    // Se o preço base mudou no config.yml, redefinimos o preço atual para o novo preço base
+                    if (oldBasePrice != null && oldBasePrice.compareTo(newBasePrice) != 0) {
+                        cached.setCurrentPrice(newBasePrice);
+                        getLogger().info("[Market] Preço base de " + entry.getKey() + " alterado no config.yml (" + oldBasePrice + " -> " + newBasePrice + "). Preço atual redefinido.");
+                    } else {
+                        // Garante que o preço atual está nos limites
+                        BigDecimal adjusted = cached.getCurrentPrice().max(cached.getFloorPrice()).min(cached.getCeilingPrice());
+                        cached.setCurrentPrice(adjusted);
+                    }
+                    
+                    marketCache.updateItem(entry.getKey(), cached);
+                    toSave.add(cached);
                 } else {
-                    // Garante que o preço atual está nos limites
-                    BigDecimal adjusted = cached.getCurrentPrice().max(cached.getFloorPrice()).min(cached.getCeilingPrice());
-                    cached.setCurrentPrice(adjusted);
-                }
-                
-                marketCache.updateItem(entry.getKey(), cached);
-                if (databaseManager.isConnected()) {
-                    databaseManager.savePrice(cached);
-                }
-            } else {
-                // Item novo: insere no cache local
-                marketCache.updateItem(entry.getKey(), entry.getValue());
-                if (databaseManager.isConnected()) {
-                    databaseManager.savePrice(entry.getValue());
+                    // Item novo: insere no cache local
+                    marketCache.updateItem(entry.getKey(), entry.getValue());
+                    toSave.add(entry.getValue());
                 }
             }
-        }
 
-        // Se o banco estiver conectado, faz o seed de itens novos no banco
-        if (databaseManager.isConnected()) {
-            databaseManager.seedDefaultItems(configItems).thenRun(() -> {
-                getLogger().info("[RootsSkyMarket] Sincronização de itens concluída com sucesso.");
-            });
+            // Salva todos os itens de forma atômica no banco de dados em lote (evita deadlocks e saturação do Supabase)
+            if (databaseManager.isConnected() && !toSave.isEmpty()) {
+                databaseManager.savePricesBatch(toSave).thenRun(() -> {
+                    getLogger().info("[RootsSkyMarket] Sincronização de itens e preços em lote concluída com sucesso.");
+                }).exceptionally(ex -> {
+                    getLogger().log(java.util.logging.Level.SEVERE, "Erro ao salvar itens em lote no banco:", ex);
+                    return null;
+                });
+            } else {
+                getLogger().info("[RootsSkyMarket] Sincronização concluída apenas em cache local (banco não conectado).");
+            }
+        } catch (Throwable t) {
+            getLogger().log(java.util.logging.Level.SEVERE, "Erro crítico na sincronização de itens da configuração:", t);
         }
     }
 

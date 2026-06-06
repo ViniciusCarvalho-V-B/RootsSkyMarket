@@ -268,36 +268,49 @@ public class DatabaseManager {
         }, executor);
     }
 
-    public CompletableFuture<Void> seedDefaultItems(Map<String, MarketItem> defaults) {
+    public CompletableFuture<Void> savePricesBatch(java.util.Collection<MarketItem> items) {
         return CompletableFuture.runAsync(() -> {
+            if (items.isEmpty()) return;
             if (!ensureConnected()) return;
 
             String sql;
             if (dbType.equals("MYSQL")) {
-                sql = "INSERT IGNORE INTO market_prices (item_id, base_price, current_price, alpha, category, floor_price, ceiling_price, volume_24h, last_update) " +
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, 0, NOW())";
+                sql = "INSERT INTO market_prices (item_id, base_price, current_price, alpha, category, floor_price, ceiling_price, volume_24h, last_update) " +
+                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                      "ON DUPLICATE KEY UPDATE base_price=VALUES(base_price), current_price=VALUES(current_price), " +
+                      "alpha=VALUES(alpha), category=VALUES(category), floor_price=VALUES(floor_price), " +
+                      "ceiling_price=VALUES(ceiling_price), volume_24h=VALUES(volume_24h), last_update=VALUES(last_update)";
             } else {
                 sql = "INSERT INTO market_prices (item_id, base_price, current_price, alpha, category, floor_price, ceiling_price, volume_24h, last_update) " +
-                      "VALUES (?, ?, ?, ?, ?, ?, ?, 0, CURRENT_TIMESTAMP) ON CONFLICT (item_id) DO NOTHING";
+                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                      "ON CONFLICT (item_id) DO UPDATE SET base_price=EXCLUDED.base_price, current_price=EXCLUDED.current_price, " +
+                      "alpha=EXCLUDED.alpha, category=EXCLUDED.category, floor_price=EXCLUDED.floor_price, " +
+                      "ceiling_price=EXCLUDED.ceiling_price, volume_24h=EXCLUDED.volume_24h, last_update=EXCLUDED.last_update";
             }
             try (Connection conn = dataSource.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-                for (var entry : defaults.entrySet()) {
-                    MarketItem item = entry.getValue();
-                    stmt.setString(1, item.getItemId());
-                    stmt.setBigDecimal(2, item.getBasePrice());
-                    stmt.setBigDecimal(3, item.getCurrentPrice());
-                    stmt.setBigDecimal(4, item.getAlpha());
-                    stmt.setString(5, item.getCategory());
-                    stmt.setBigDecimal(6, item.getFloorPrice());
-                    stmt.setBigDecimal(7, item.getCeilingPrice());
+                conn.setAutoCommit(false);
+                Timestamp now = Timestamp.from(Instant.now());
+
+                for (MarketItem item : items) {
+                    int idx = 1;
+                    stmt.setString(idx++, item.getItemId());
+                    stmt.setBigDecimal(idx++, item.getBasePrice());
+                    stmt.setBigDecimal(idx++, item.getCurrentPrice());
+                    stmt.setBigDecimal(idx++, item.getAlpha());
+                    stmt.setString(idx++, item.getCategory());
+                    stmt.setBigDecimal(idx++, item.getFloorPrice());
+                    stmt.setBigDecimal(idx++, item.getCeilingPrice());
+                    stmt.setInt(idx++, item.getVolume24h());
+                    stmt.setTimestamp(idx++, now);
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
-                logger.info("Seeded " + defaults.size() + " default items.");
+                conn.commit();
+                logger.info("[DatabaseManager] Saved/updated " + items.size() + " prices in batch.");
             } catch (SQLException e) {
-                logger.log(Level.SEVERE, "Failed to seed default items", e);
+                logger.log(Level.SEVERE, "Failed to save prices in batch", e);
             }
         }, executor);
     }
