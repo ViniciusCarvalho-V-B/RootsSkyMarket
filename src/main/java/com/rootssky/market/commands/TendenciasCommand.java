@@ -41,10 +41,22 @@ public class TendenciasCommand implements CommandExecutor {
 
         for (MarketItem item : stockGUI.getTopGainers(3)) {
             BigDecimal variation = calculateVariation(item);
-            String varStr = "+" + variation.abs().setScale(1, RoundingMode.HALF_UP) + "%";
+            int comp = variation.compareTo(BigDecimal.ZERO);
+            String varStr;
+            NamedTextColor color;
+            if (comp > 0) {
+                varStr = "+" + variation.abs().setScale(1, RoundingMode.HALF_UP) + "%";
+                color = NamedTextColor.GREEN;
+            } else if (comp < 0) {
+                varStr = "-" + variation.abs().setScale(1, RoundingMode.HALF_UP) + "%";
+                color = NamedTextColor.RED;
+            } else {
+                varStr = "0.0%";
+                color = NamedTextColor.GRAY;
+            }
             player.sendMessage(Component.text("  " + item.getItemId() + " ")
                     .color(NamedTextColor.WHITE)
-                    .append(Component.text(varStr).color(NamedTextColor.GREEN))
+                    .append(Component.text(varStr).color(color))
                     .append(Component.text(" - ").color(NamedTextColor.GRAY))
                     .append(Component.text(plugin.getVaultBridge().format(item.getCurrentPrice().doubleValue()))
                             .color(NamedTextColor.YELLOW)));
@@ -56,10 +68,22 @@ public class TendenciasCommand implements CommandExecutor {
 
         for (MarketItem item : stockGUI.getTopLosers(3)) {
             BigDecimal variation = calculateVariation(item);
-            String varStr = "-" + variation.abs().setScale(1, RoundingMode.HALF_UP) + "%";
+            int comp = variation.compareTo(BigDecimal.ZERO);
+            String varStr;
+            NamedTextColor color;
+            if (comp > 0) {
+                varStr = "+" + variation.abs().setScale(1, RoundingMode.HALF_UP) + "%";
+                color = NamedTextColor.GREEN;
+            } else if (comp < 0) {
+                varStr = "-" + variation.abs().setScale(1, RoundingMode.HALF_UP) + "%";
+                color = NamedTextColor.RED;
+            } else {
+                varStr = "0.0%";
+                color = NamedTextColor.GRAY;
+            }
             player.sendMessage(Component.text("  " + item.getItemId() + " ")
                     .color(NamedTextColor.WHITE)
-                    .append(Component.text(varStr).color(NamedTextColor.RED))
+                    .append(Component.text(varStr).color(color))
                     .append(Component.text(" - ").color(NamedTextColor.GRAY))
                     .append(Component.text(plugin.getVaultBridge().format(item.getCurrentPrice().doubleValue()))
                             .color(NamedTextColor.YELLOW)));

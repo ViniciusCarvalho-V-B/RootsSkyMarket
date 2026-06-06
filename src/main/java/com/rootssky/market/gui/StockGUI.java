@@ -95,8 +95,7 @@ public class StockGUI {
         for (int i = 0; i < GAINER_SLOTS.length; i++) {
             if (i < allItems.size()) {
                 MarketItem item = allItems.get(i);
-                boolean isGainer = calculateVariation(item).compareTo(BigDecimal.ZERO) >= 0;
-                inventory.setItem(GAINER_SLOTS[i], buildMarketDisplayItem(item, isGainer));
+                inventory.setItem(GAINER_SLOTS[i], buildMarketDisplayItem(item));
             } else {
                 inventory.setItem(GAINER_SLOTS[i], createItem(Material.LIME_STAINED_GLASS_PANE,
                         Component.text(" ").color(NamedTextColor.GRAY)));
@@ -111,8 +110,7 @@ public class StockGUI {
         for (int i = 0; i < LOSER_SLOTS.length; i++) {
             if (i < allItems.size()) {
                 MarketItem item = allItems.get(i);
-                boolean isGainer = calculateVariation(item).compareTo(BigDecimal.ZERO) >= 0;
-                inventory.setItem(LOSER_SLOTS[i], buildMarketDisplayItem(item, isGainer));
+                inventory.setItem(LOSER_SLOTS[i], buildMarketDisplayItem(item));
             } else {
                 inventory.setItem(LOSER_SLOTS[i], createItem(Material.RED_STAINED_GLASS_PANE,
                         Component.text(" ").color(NamedTextColor.GRAY)));
@@ -131,8 +129,7 @@ public class StockGUI {
         for (int i = 0; i < itemsPerPage; i++) {
             if (startIndex + i < allItems.size()) {
                 MarketItem item = allItems.get(startIndex + i);
-                boolean isGainer = calculateVariation(item).compareTo(BigDecimal.ZERO) >= 0;
-                inventory.setItem(ITEM_SLOTS[i], buildMarketDisplayItem(item, isGainer));
+                inventory.setItem(ITEM_SLOTS[i], buildMarketDisplayItem(item));
             } else {
                 inventory.setItem(ITEM_SLOTS[i], createItem(Material.BLACK_STAINED_GLASS_PANE,
                         Component.text(" ").color(NamedTextColor.GRAY)));
@@ -149,15 +146,27 @@ public class StockGUI {
         }
     }
 
-    private ItemStack buildMarketDisplayItem(MarketItem item, boolean isGainer) {
+    private ItemStack buildMarketDisplayItem(MarketItem item) {
         Material material = resolveMaterial(item.getItemId());
         BigDecimal variation = calculateVariation(item);
-        NamedTextColor varColor = isGainer ? NamedTextColor.GREEN : NamedTextColor.RED;
+        
+        NamedTextColor varColor;
         String varStr;
-        if (variation.compareTo(BigDecimal.ZERO) >= 0) {
+        Component trendComponent;
+        
+        int compResult = variation.compareTo(BigDecimal.ZERO);
+        if (compResult > 0) {
+            varColor = NamedTextColor.GREEN;
             varStr = "+" + variation.setScale(1, RoundingMode.HALF_UP) + "%";
-        } else {
+            trendComponent = Component.text("Tendência: ▃ ▅ ▆ ▇ █").color(NamedTextColor.GREEN);
+        } else if (compResult < 0) {
+            varColor = NamedTextColor.RED;
             varStr = variation.setScale(1, RoundingMode.HALF_UP) + "%";
+            trendComponent = Component.text("Tendência: █ ▇ ▆ ▅ ▃").color(NamedTextColor.RED);
+        } else {
+            varColor = NamedTextColor.GRAY;
+            varStr = "0.0%";
+            trendComponent = Component.text("Tendência: ▬ ▬ ▬ ▬ ▬").color(NamedTextColor.GRAY);
         }
 
         Component name = Component.text(item.getItemId())
@@ -172,12 +181,7 @@ public class StockGUI {
                 .append(Component.text(varStr).color(varColor)));
         lore.add(Component.text("Volume (24h): ").color(NamedTextColor.GRAY)
                 .append(Component.text(item.getVolume24h() + " un").color(NamedTextColor.WHITE)));
-
-        if (isGainer) {
-            lore.add(Component.text("Tendência: ▃ ▅ ▆ ▇ █").color(NamedTextColor.GREEN));
-        } else {
-            lore.add(Component.text("Tendência: █ ▇ ▆ ▅ ▃").color(NamedTextColor.RED));
-        }
+        lore.add(trendComponent);
 
         return createItem(material, name, lore);
     }

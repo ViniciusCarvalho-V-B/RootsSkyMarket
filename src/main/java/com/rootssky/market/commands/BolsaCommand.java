@@ -86,8 +86,9 @@ public class BolsaCommand implements CommandExecutor, TabCompleter {
                     .divide(basePrice, 2, RoundingMode.HALF_UP);
         }
 
-        String varColor = variationPct.compareTo(BigDecimal.ZERO) >= 0 ? "§a" : "§c";
-        String varSign = variationPct.compareTo(BigDecimal.ZERO) >= 0 ? "+" : "";
+        int comp = variationPct.compareTo(BigDecimal.ZERO);
+        String varColor = comp > 0 ? "§a" : (comp < 0 ? "§c" : "§7");
+        String varSign = comp > 0 ? "+" : "";
 
         player.sendMessage("§e§l=== Relatório: " + itemId + " ===");
         player.sendMessage("§7Preço Atual: §a" + plugin.getVaultBridge().format(currentPrice.doubleValue()));

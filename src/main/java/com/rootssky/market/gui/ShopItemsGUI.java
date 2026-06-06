@@ -86,13 +86,29 @@ public class ShopItemsGUI {
                                 .divide(basePrice, 2, RoundingMode.HALF_UP);
                     }
 
-                    String varColor = variationPct.compareTo(BigDecimal.ZERO) >= 0 ? "§a" : "§c";
-                    String varSign = variationPct.compareTo(BigDecimal.ZERO) >= 0 ? "▲ +" : "▼ ";
+                    String varColor;
+                    String varSign;
+                    String formattedVariation;
+
+                    int comp = variationPct.compareTo(BigDecimal.ZERO);
+                    if (comp > 0) {
+                        varColor = "§a";
+                        varSign = "▲ +";
+                        formattedVariation = variationPct.setScale(2, RoundingMode.HALF_UP) + "%";
+                    } else if (comp < 0) {
+                        varColor = "§c";
+                        varSign = "▼ ";
+                        formattedVariation = variationPct.setScale(2, RoundingMode.HALF_UP) + "%";
+                    } else {
+                        varColor = "§7";
+                        varSign = "▶ ";
+                        formattedVariation = "0.00%";
+                    }
 
                     lore.add(Component.text("§7Preço de Compra: §a" + plugin.getVaultBridge().format(currentPrice.doubleValue())));
                     lore.add(Component.text("§7Preço de Venda: §c" + plugin.getVaultBridge().format(sellPrice.doubleValue())));
                     lore.add(Component.text(""));
-                    lore.add(Component.text("§7Mercado: " + varColor + varSign + variationPct.setScale(2, RoundingMode.HALF_UP) + "%"));
+                    lore.add(Component.text("§7Mercado: " + varColor + varSign + formattedVariation));
                 } else if (marketItem != null) {
                     BigDecimal sellPrice = marketItem.getBasePrice().multiply(BigDecimal.valueOf(0.95));
                     lore.add(Component.text("§7Preço de Compra: §a" + plugin.getVaultBridge().format(marketItem.getBasePrice().doubleValue())));
