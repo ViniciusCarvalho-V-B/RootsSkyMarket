@@ -40,7 +40,6 @@ O plugin é **plug-and-play** com banco de dados SQLite local, mas também ofere
 
 ### Opcionais (Recomendados):
 * [**PlaceholderAPI**](https://www.spigotmc.org/resources/placeholderapi.6245/) (para exibição de dados do mercado em scoreboards, tablists e hologramas)
-* [**EconomyShopGUI**](https://www.spigotmc.org/resources/economyshopgui.69927/) (suporte a transições/softdepend)
 
 ---
 
